@@ -106,7 +106,10 @@ class Life {
         return util.clone(...args);
     }
 
+    #gender = 'M';
+
     setGender(gender) {
+        this.#gender = gender;
         this.#property.set(this.PropertyTypes.GND, gender);
     }
 
@@ -122,6 +125,7 @@ class Life {
             this.#initialData[key] = util.clone(allocation[key]);
         }
         this.#property.restart(this.#initialData);
+        this.#property.set(this.PropertyTypes.GND, this.#gender);
         this.doTalent()
         this.#property.restartLastStep();
         this.#achievement.achieve(this.AchievementOpportunity.START);
