@@ -1,0 +1,20 @@
+{
+    "name": "school_restart",
+    "type": "module",
+    "main": "repl/index.js",
+    "version": "1.0.0",
+    "description": "校园恋爱重开模拟器 - 基于 lifeRestart 改编",
+    "scripts": {
+        "xlsx2json": "vt transform -d public \"data/**/*.xlsx\"",
+        "dev": "vite",
+        "build": "vite build",
+        "start": "vite preview",
+        "test": "vitest"
+    },
+    "devDependencies": {
+        "v-transform": "^2.2.1",
+        "vite": "^8.0.3",
+        "vitest": "^4.1.2",
+        "xlsx": "^0.20.3"
+    }
+}
