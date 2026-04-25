@@ -203,7 +203,7 @@ export default class Trajectory extends ui.view.DefaultTheme.TrajectoryUI {
         const item = this.#createTrajectoryItem();
         const label = Trajectory.SEM_LABELS[sem] || `第${sem}学期`;
         item.labAge.text = label;
-        item.labAge.fontSize = label.length > 4 ? 34 : label.length > 3 ? 40 : 50;
+        item.labAge.fontSize = label.length > 5 ? 28 : label.length > 4 ? 34 : label.length > 3 ? 40 : 50;
         item.labContent.text = content.map(
             ({type, description, grade, name, postEvent}) => {
                 switch(type) {

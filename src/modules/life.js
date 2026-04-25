@@ -107,6 +107,8 @@ class Life {
     }
 
     #gender = 'M';
+    #choicePool = [];
+    #choiceCooldown = 0;
 
     setGender(gender) {
         this.#gender = gender;
@@ -126,6 +128,8 @@ class Life {
         }
         this.#property.restart(this.#initialData);
         this.#property.set(this.PropertyTypes.GND, this.#gender);
+        this.#choicePool = this.#event.getChoiceIds();
+        this.#choiceCooldown = 0;
         this.doTalent()
         this.#property.restartLastStep();
         this.#achievement.achieve(this.AchievementOpportunity.START);
@@ -144,18 +148,30 @@ class Life {
         const talentContent = this.doTalent(talent);
 
         const guaranteedContent = [];
+        let choiceTriggered = false;
         if (guaranteed && guaranteed.length > 0) {
             for (const gEventId of guaranteed) {
                 const result = this.#event.do(gEventId);
                 if (result.isChoice) {
+                    if (choiceTriggered || this.#choiceCooldown > 0) continue;
+
+                    const triggered = this.#property.get(this.PropertyTypes.EVT) || [];
+                    const available = this.#choicePool.filter(id => !triggered.includes(id));
+                    if (available.length === 0) continue;
+
+                    const pickedId = available[Math.floor(Math.random() * available.length)];
+                    const picked = this.#event.do(pickedId);
+
                     guaranteedContent.push({
                         type: this.PropertyTypes.EVT,
-                        description: this.format(result.description),
-                        grade: result.grade,
+                        description: this.format(picked.description),
+                        grade: picked.grade,
                         isChoice: true,
-                        choices: result.choices,
-                        eventId: result.eventId,
+                        choices: picked.choices,
+                        eventId: picked.eventId,
                     });
+                    choiceTriggered = true;
+                    this.#choiceCooldown = 4;
                 } else {
                     this.#property.change(this.PropertyTypes.EVT, gEventId);
                     this.#property.effect(result.effect || {});
@@ -171,6 +187,8 @@ class Life {
                 }
             }
         }
+
+        if (this.#choiceCooldown > 0) this.#choiceCooldown--;
 
         const eventContent = this.doEvent(this.random(event));
 
@@ -260,9 +278,10 @@ class Life {
 
     random(events) {
         if (!events || !events.length) return undefined;
+        const triggered = this.#property.get(this.PropertyTypes.EVT) || [];
         return util.weightRandom(
             events.filter(
-                ([eventId])=>this.#event.check(eventId)
+                ([eventId])=>this.#event.check(eventId) && !triggered.includes(eventId)
             )
         );
     }

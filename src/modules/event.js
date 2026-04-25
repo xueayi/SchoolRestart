@@ -48,6 +48,12 @@ class Event {
         return Object.keys(this.#events).length;
     }
 
+    getChoiceIds() {
+        return Object.entries(this.#events)
+            .filter(([, e]) => e.isChoice)
+            .map(([id]) => Number(id));
+    }
+
     check(eventId) {
         const { include, exclude, NoRandom } = this.get(eventId);
         if(NoRandom) return false;

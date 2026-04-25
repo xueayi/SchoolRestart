@@ -230,7 +230,7 @@ export default class CyberTrajectory extends ui.view.CyberTheme.CyberTrajectoryU
         const item = this.#createTrajectoryItem();
         const label = CyberTrajectory.SEM_LABELS[age] || `第${age}学期`;
         item.labAge.text = label;
-        item.labAge.fontSize = label.length > 4 ? 34 : label.length > 3 ? 40 : 50;
+        item.labAge.fontSize = label.length > 5 ? 28 : label.length > 4 ? 34 : label.length > 3 ? 40 : 50;
         item.labContent.text = content.map(
             ({type, description, grade, name, postEvent}) => {
                 switch(type) {

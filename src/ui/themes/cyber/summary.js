@@ -117,21 +117,38 @@ export default class CyberSummary extends ui.view.CyberTheme.CyberSummaryUI {
     }
 
     #showStoryPage() {
+        const W = Laya.stage.width;
+        const H = Laya.stage.height;
+        const BTN_H = 100;
+
         const overlay = new Laya.Sprite();
-        overlay.graphics.drawRect(0, 0, Laya.stage.width, Laya.stage.height, '#0a1929');
-        overlay.width = Laya.stage.width;
-        overlay.height = Laya.stage.height;
+        overlay.graphics.drawRect(0, 0, W, H, '#0a1929');
+        overlay.width = W;
+        overlay.height = H;
         overlay.zOrder = 9999;
         Laya.stage.addChild(overlay);
 
+        const backBtn = new Laya.Label();
+        backBtn.text = '返回总结';
+        backBtn.fontSize = 42;
+        backBtn.color = '#0a1929';
+        backBtn.bgColor = '#5cc8dc';
+        backBtn.padding = '16,60,16,60';
+        backBtn.align = 'center';
+        backBtn.width = 300;
+        backBtn.x = (W - 300) / 2;
+        backBtn.y = H - BTN_H - 20;
+        backBtn.mouseEnabled = true;
+        overlay.addChild(backBtn);
+
         const panel = new Laya.Panel();
-        panel.width = overlay.width;
-        panel.height = overlay.height;
+        panel.width = W;
+        panel.height = H - BTN_H - 40;
         panel.vScrollBarSkin = '';
         panel.vScrollBar.elasticDistance = 100;
 
         const content = new Laya.Box();
-        content.width = overlay.width - 80;
+        content.width = W - 80;
         content.x = 40;
 
         const title = new Laya.Label();
@@ -153,20 +170,11 @@ export default class CyberSummary extends ui.view.CyberTheme.CyberSummaryUI {
         body.y = 160;
         content.addChild(body);
 
-        const backBtn = new Laya.Label();
-        backBtn.text = '返回总结';
-        backBtn.fontSize = 42;
-        backBtn.color = '#0a1929';
-        backBtn.bgColor = '#5cc8dc';
-        backBtn.padding = '16,60,16,60';
-        backBtn.align = 'center';
-        backBtn.width = 300;
-        backBtn.x = (content.width - 300) / 2;
-        backBtn.y = body.y + body.textHeight + 60;
-        backBtn.mouseEnabled = true;
-        content.addChild(backBtn);
+        Laya.timer.frameOnce(2, this, () => {
+            content.height = body.y + body.textHeight + 80;
+        });
+        content.height = 2000;
 
-        content.height = backBtn.y + 140;
         panel.addChild(content);
         overlay.addChild(panel);
 
