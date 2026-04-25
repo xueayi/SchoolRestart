@@ -53,19 +53,34 @@ export default class Summary extends ui.view.DefaultTheme.SummaryUI {
         this.#storyText = $lang[storyKey] ? core.format($lang[storyKey]) : '';
         if (this.#storyText) {
             if (!this.#storyBtn) {
-                const btn = new Laya.Label();
-                btn.text = '💕 查看你的恋爱故事 💕';
-                btn.fontSize = 38;
-                btn.color = '#e8a0bf';
-                btn.align = 'center';
-                btn.width = this.width - 80;
-                btn.centerX = 0;
-                btn.mouseEnabled = true;
+                const btnBox = new Laya.Box();
+                btnBox.width = this.width - 80;
+                btnBox.height = 80;
+                btnBox.centerX = 0;
                 const parent = this.listSummary.parent;
-                btn.y = this.listSummary.y + this.listSummary.height + 30;
-                parent.addChild(btn);
-                btn.on(Laya.Event.CLICK, this, this.#showStoryPage);
-                this.#storyBtn = btn;
+                btnBox.y = this.listSummary.y + this.listSummary.height + 30;
+                parent.addChild(btnBox);
+
+                const btnBg = new Laya.Sprite();
+                btnBg.graphics.drawRect(0, 0, btnBox.width, btnBox.height, '#e8a0bf');
+                btnBox.addChild(btnBg);
+
+                const btn = new Laya.Label();
+                btn.text = '>> 查看你的恋爱故事 <<';
+                btn.fontSize = 40;
+                btn.color = '#1a0a1e';
+                btn.bold = true;
+                btn.align = 'center';
+                btn.valign = 'middle';
+                btn.width = btnBox.width;
+                btn.height = btnBox.height;
+                btnBox.addChild(btn);
+
+                btnBox.on(Laya.Event.CLICK, this, this.#showStoryPage);
+                Laya.Tween.to(btnBg, { alpha: 0.6 }, 600, null, Laya.Handler.create(this, () => {
+                    Laya.Tween.to(btnBg, { alpha: 1 }, 600, null, null, 0, true);
+                }));
+                this.#storyBtn = btnBox;
             }
         }
     }
@@ -106,24 +121,24 @@ export default class Summary extends ui.view.DefaultTheme.SummaryUI {
         body.y = 160;
         content.addChild(body);
 
-        const closeBtn = new Laya.Label();
-        closeBtn.text = '关 闭';
-        closeBtn.fontSize = 42;
-        closeBtn.color = '#fff';
-        closeBtn.bgColor = '#e8a0bf';
-        closeBtn.padding = '16,60,16,60';
-        closeBtn.align = 'center';
-        closeBtn.width = 260;
-        closeBtn.x = (content.width - 260) / 2;
-        closeBtn.y = body.y + body.textHeight + 60;
-        closeBtn.mouseEnabled = true;
-        content.addChild(closeBtn);
+        const backBtn = new Laya.Label();
+        backBtn.text = '返回总结';
+        backBtn.fontSize = 42;
+        backBtn.color = '#1a0a1e';
+        backBtn.bgColor = '#e8a0bf';
+        backBtn.padding = '16,60,16,60';
+        backBtn.align = 'center';
+        backBtn.width = 300;
+        backBtn.x = (content.width - 300) / 2;
+        backBtn.y = body.y + body.textHeight + 60;
+        backBtn.mouseEnabled = true;
+        content.addChild(backBtn);
 
-        content.height = closeBtn.y + 140;
+        content.height = backBtn.y + 140;
         panel.addChild(content);
         overlay.addChild(panel);
 
-        closeBtn.on(Laya.Event.CLICK, this, () => {
+        backBtn.on(Laya.Event.CLICK, this, () => {
             overlay.destroy(true);
         });
     }

@@ -146,12 +146,12 @@ export default class CyberProperty extends ui.view.CyberTheme.CyberPropertyUI {
     }
 
     static PRESETS = [
-        { name: '🎲 纯随机', weights: null },
-        { name: '💄 颜值型', weights: [5, 1, 1, 2] },
-        { name: '📚 学霸型', weights: [1, 5, 1, 2] },
-        { name: '🗣 社交达人', weights: [1, 1, 5, 2] },
-        { name: '✨ 万人迷', weights: [2, 1, 1, 5] },
-        { name: '⚖ 均衡型', weights: [1, 1, 1, 1] },
+        { name: '[ 纯随机 ]', weights: null },
+        { name: '[ 颜值型 ]', weights: [5, 1, 1, 2] },
+        { name: '[ 学霸型 ]', weights: [1, 5, 1, 2] },
+        { name: '[ 社交达人 ]', weights: [1, 1, 5, 2] },
+        { name: '[ 万人迷 ]', weights: [2, 1, 1, 5] },
+        { name: '[ 均衡型 ]', weights: [1, 1, 1, 1] },
     ];
 
     showRandomOptions() {
