@@ -15,7 +15,7 @@ globalThis.$_ = utils;
 globalThis.goto = async tag => {
     let url;
     switch (tag) {
-        case 'github': url = 'https://github.com/VickScarlet/lifeRestart'; break;
+        case 'github': url = 'https://github.com/xueayi/SchoolRestart'; break;
     }
     try {
         if (Laya.Browser.onIOS) {
