@@ -46,6 +46,7 @@ export default class Trajectory extends ui.view.DefaultTheme.TrajectoryUI {
     #trajectoryItems;
     #talents;
     #enableExtend;
+    #waitingChoice = false;
 
     static SEM_LABELS = [
         '',
@@ -101,7 +102,7 @@ export default class Trajectory extends ui.view.DefaultTheme.TrajectoryUI {
     }
 
     onNext() {
-        if(this.#isEnd) return;
+        if(this.#isEnd || this.#waitingChoice) return;
 
         const { age, content, isEnd, isChoice, choiceItem } = core.next();
         this.#isEnd = isEnd;
@@ -119,84 +120,76 @@ export default class Trajectory extends ui.view.DefaultTheme.TrajectoryUI {
         this.updateProperty();
 
         if(isChoice && choiceItem && !isEnd) {
-            this.showChoice(choiceItem);
+            this.showChoiceInline(choiceItem);
         }
     }
 
-    showChoice(choiceItem) {
+    showChoiceInline(choiceItem) {
         this.speed = 0;
+        this.#waitingChoice = true;
 
-        const overlay = new Laya.Box();
-        overlay.width = this.width;
-        overlay.height = this.height;
-        overlay.zOrder = 100;
+        const qItem = this.#createTrajectoryItem();
+        qItem.labAge.text = '❓';
+        qItem.labContent.text = choiceItem.description;
+        qItem.grade(1);
+        this.vboxTrajectory.addChild(qItem);
+        this.#trajectoryItems.push(qItem);
+        qItem.y = this.vboxTrajectory.height;
 
-        const bg = new Laya.Sprite();
-        bg.graphics.drawRect(0, 0, overlay.width, overlay.height, 'rgba(0,0,0,0.7)');
-        overlay.addChild(bg);
-
-        const panel = new Laya.Box();
-        panel.width = overlay.width * 0.85;
-        panel.centerX = 0;
-        panel.centerY = 0;
-        overlay.addChild(panel);
-
-        const question = new Laya.Label();
-        question.text = choiceItem.description;
-        question.fontSize = 40;
-        question.color = '#ffffff';
-        question.wordWrap = true;
-        question.width = panel.width;
-        question.align = 'center';
-        question.y = 0;
-        panel.addChild(question);
-
-        let btnY = question.height + 60;
+        const config = $ui.common.trajectoryItem;
+        const containerWidth = qItem.width || this.vboxTrajectory.width || this.width * 0.9;
 
         choiceItem.choices.forEach((choice, index) => {
             const btn = new Laya.Box();
-            btn.width = panel.width;
-            btn.height = 100;
-            btn.y = btnY;
+            btn.width = containerWidth;
+            btn.height = 90;
 
             const btnBg = new Laya.Sprite();
-            btnBg.graphics.drawRect(0, 0, btn.width, btn.height, '#2d1f3d');
-            btnBg.graphics.drawRect(0, 0, btn.width, btn.height, null, '#e8a0bf', 2);
+            btnBg.graphics.drawRect(8, 0, btn.width - 16, btn.height, '#2d1f3d');
+            btnBg.graphics.drawRect(8, 0, btn.width - 16, btn.height, null, '#e8a0bf', 2);
             btn.addChild(btnBg);
 
             const label = new Laya.Label();
             label.text = core.format(choice.text);
-            label.fontSize = 36;
+            label.fontSize = 34;
             label.color = '#f0e6f6';
-            label.width = btn.width;
+            label.width = btn.width - 32;
             label.height = btn.height;
+            label.x = 16;
             label.align = 'center';
             label.valign = 'middle';
             btn.addChild(label);
 
             btn.on(Laya.Event.CLICK, this, () => {
+                this.#waitingChoice = false;
                 const result = core.resolveChoice(choiceItem.eventId, index);
-                overlay.removeSelf();
-                overlay.destroy();
 
+                const resItem = this.#createTrajectoryItem();
+                resItem.labAge.text = '→';
+                const resTexts = [`选择了「${core.format(choice.text)}」`];
                 if (result.length > 0) {
-                    const item = this.#createTrajectoryItem();
-                    item.labAge.text = '→';
-                    item.labContent.text = `选择了「${core.format(choice.text)}」\n` + result.map(r => r.description || '').filter(Boolean).join('\n');
-                    item.grade(result[result.length - 1]?.grade || 0);
-                    this.vboxTrajectory.addChild(item);
-                    this.#trajectoryItems.push(item);
-                    item.y = this.vboxTrajectory.height;
+                    resTexts.push(...result.map(r => r.description || '').filter(Boolean));
                 }
+                resItem.labContent.text = resTexts.join('\n');
+                resItem.grade(result.length > 0 ? (result[result.length - 1]?.grade || 0) : 0);
+                this.vboxTrajectory.addChild(resItem);
+                this.#trajectoryItems.push(resItem);
+                resItem.y = this.vboxTrajectory.height;
+
                 this.updateProperty();
-                this.panelTrajectory.scrollTo(0, this.panelTrajectory.contentHeight);
+                Laya.timer.frameOnce(1, this, () => {
+                    this.panelTrajectory.scrollTo(0, this.panelTrajectory.contentHeight);
+                });
             });
 
-            panel.addChild(btn);
-            btnY += 120;
+            this.vboxTrajectory.addChild(btn);
+            this.#trajectoryItems.push(btn);
+            btn.y = this.vboxTrajectory.height;
         });
 
-        this.addChild(overlay);
+        Laya.timer.frameOnce(1, this, () => {
+            this.panelTrajectory.scrollTo(0, this.panelTrajectory.contentHeight);
+        });
     }
 
     renderTrajectory(sem, content) {

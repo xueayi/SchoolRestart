@@ -54,6 +54,20 @@ class Event {
             .map(([id]) => Number(id));
     }
 
+    getChoiceIdsBySemRange(semMin, semMax) {
+        return Object.entries(this.#events)
+            .filter(([, e]) => e.isChoice)
+            .filter(([, e]) => {
+                if (!e.include) return true;
+                const semMatch = e.include.match(/SEM>=(\d+)&SEM<=(\d+)/);
+                if (!semMatch) return true;
+                const lo = Number(semMatch[1]);
+                const hi = Number(semMatch[2]);
+                return !(hi < semMin || lo > semMax);
+            })
+            .map(([id]) => Number(id));
+    }
+
     check(eventId) {
         const { include, exclude, NoRandom } = this.get(eventId);
         if(NoRandom) return false;

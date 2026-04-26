@@ -110,6 +110,21 @@ class Life {
     #choicePool = [];
     #choiceCooldown = 0;
 
+    static STAGE_BOUNDS = [
+        [1, 9],     // 婴幼儿+幼儿园
+        [10, 27],   // 小学
+        [28, 45],   // 初中
+        [46, 69],   // 高中
+        [70, 101],  // 大学
+    ];
+
+    #getStageRange(sem) {
+        for (const [lo, hi] of Life.STAGE_BOUNDS) {
+            if (sem >= lo && sem <= hi) return [lo, hi];
+        }
+        return [1, 101];
+    }
+
     setGender(gender) {
         this.#gender = gender;
         this.#property.set(this.PropertyTypes.GND, gender);
@@ -156,7 +171,9 @@ class Life {
                     if (choiceTriggered || this.#choiceCooldown > 0) continue;
 
                     const triggered = this.#property.get(this.PropertyTypes.EVT) || [];
-                    const available = this.#choicePool.filter(id => !triggered.includes(id));
+                    const [sLo, sHi] = this.#getStageRange(age);
+                    const stageChoices = this.#event.getChoiceIdsBySemRange(sLo, sHi);
+                    const available = stageChoices.filter(id => !triggered.includes(id));
                     if (available.length === 0) continue;
 
                     const pickedId = available[Math.floor(Math.random() * available.length)];
@@ -364,6 +381,22 @@ class Life {
     }
 
     get storyKey() {
+        const vit = this.#property.get(this.PropertyTypes.VIT);
+        if (vit <= 0) return 'STORY_BAD_EXHAUST';
+
+        const hlov = this.#property.get(this.PropertyTypes.HLOV);
+        if (hlov <= 0) return 'STORY_BAD_NOLOVE';
+
+        const weakMap = [
+            [this.PropertyTypes.HAPR, 'APR'],
+            [this.PropertyTypes.HKNW, 'KNW'],
+            [this.PropertyTypes.HSOC, 'SOC'],
+            [this.PropertyTypes.HCHM, 'CHM'],
+        ];
+        for (const [type, name] of weakMap) {
+            if (this.#property.get(type) <= 2) return `STORY_BAD_WEAK_${name}`;
+        }
+
         const sum = this.#property.get(this.PropertyTypes.SUM);
         const tier = sum < 60 ? 'LONELY' : sum < 120 ? 'CRUSH' : sum < 200 ? 'FIRST' : sum < 300 ? 'SWEET' : 'WINNER';
         const attrs = [

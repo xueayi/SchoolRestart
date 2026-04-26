@@ -339,12 +339,22 @@ class Property {
         }
     }
 
+    #diminish(prop, rawDelta) {
+        if (rawDelta <= 0) return rawDelta;
+        const STAT_KEYS = [this.TYPES.APR, this.TYPES.KNW, this.TYPES.SOC, this.TYPES.CHM, this.TYPES.LOV];
+        if (!STAT_KEYS.includes(prop)) return rawDelta;
+        const cur = this.#data[prop] || 0;
+        if (cur <= 10) return rawDelta;
+        if (cur <= 20) return Math.max(1, Math.round(rawDelta * 0.5));
+        return Math.max(1, Math.round(rawDelta * 0.25));
+    }
+
     effect(effects) {
-        for(let prop in effects)
-            this.change(
-                this.hookSpecial(prop),
-                Number(effects[prop])
-            );
+        for(let prop in effects) {
+            const resolved = this.hookSpecial(prop);
+            const raw = Number(effects[prop]);
+            this.change(resolved, this.#diminish(resolved, raw));
+        }
     }
 
     judge(prop) {
